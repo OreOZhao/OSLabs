@@ -2,17 +2,54 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-
+struct VolumeLabel11{
+    uint32_t Bytes4;
+    uint32_t Bytes8;
+    uint16_t Bytes10;
+    uint8_t Bytes11;
+};
 // DBR的一些属性 分区引导扇区
 struct DosBootRecord
 {
-    uint16_t BytesPerSector;    // 每扇区字节数
-    uint8_t SectorPerCluster;   // 每簇扇区数
-    uint16_t ReservedSectorCount;   // 保留扇区数
-    uint8_t FATsCount;  // FAT表个数
-    uint32_t TotalSectorCount;  // 总扇区数
-    uint32_t FATSize;   // 扇区大小
+    uint32_t BootJmp;   // 0跳转指令
+    uint32_t OemName[2];  // 3文件系统标志和版本号
+    uint16_t BytesPerSector;    // 11每扇区字节数
+    uint8_t SectorPerCluster;   // 13每簇扇区数
+    uint16_t ReservedSectorCount;   // 14保留扇区数
+    uint8_t FATsCount;  // 16FAT表个数
+    uint16_t RootDirCount16;  // 17根目录中目录个数
+    uint16_t TotalSectorCount16;  // 19总扇区数
+    uint8_t MediaType;  // 21存储介质
+    uint16_t SectorPerFAT16;     // 22一个FAT表所占的扇区数
+    uint16_t SectorPerTrack;    // 24
+    uint16_t HeadSideCount;     // 26
+    uint32_t HiddenSectorCount;     // 28
+    uint32_t SectorCount;   // 32
+    uint32_t SectorPerFAT32;    // 36
+    uint16_t Flag32;    // 40
+    uint16_t FATVersion;    // 42
+    uint32_t RootFirstCluster;  // 44
+    uint16_t FSInfoSector;  // 48
+    uint16_t BackupBSSector;    // 50
+    uint32_t FATExtend[3];  // 52
+    uint8_t DriveNumber1;   // 64
+    uint8_t DriveNumber2;   // 65
+    uint8_t ExtendBootFlag; // 66
+    uint32_t VolumeAlignment;   // 67
+    struct VolumeLabel11 VolumeLabel;   // 71
+    uint32_t FSFormat[2];  // 82
+    uint16_t SignatureFlag;     // 510
 } DBR;
+
+struct FSINFO {
+    uint32_t ExtendBootFlag;    // 512
+    uint32_t FSINFOSignature;   // 996
+    uint32_t NextAvailableCluster;  // 1004
+    uint16_t Flag55AA;      // 1022
+    
+} FSINFO;
+
+
 
 // FAT32的一些参数 文件分配表
 struct FileAllocationTable32
@@ -34,20 +71,54 @@ typedef struct DirectoryInfo
     uint32_t Size;
 } DirectoryInfo;
 
-void printFAT32()
+void printDBR()
 {
     printf("\nDBR Attributes info:\n");
-    printf("|-----------------------|----------|\n");
-    printf("|DosBootRecordAttribute |     Value|\n");
-    printf("|-----------------------|----------|\n");
-    printf("|BytesPerSector         |%10d|\n",DBR.BytesPerSector);
-    printf("|SectorPerCluster       |%10d|\n",DBR.SectorPerCluster);
-    printf("|ReservedSectorCount    |%10d|\n",DBR.ReservedSectorCount);
-    printf("|FATsCount              |%10d|\n",DBR.FATsCount);
-    printf("|TotalSectorCount       |%10d|\n",DBR.TotalSectorCount);
-    printf("|FATSize                |%10d|\n",DBR.FATSize);
-    printf("|-----------------------|----------|\n");
-   
+    printf("-----------------------------------------------------------\n");
+    printf("DosBootRecordAttribute   Value\n");
+    printf("-----------------------------------------------------------\n");
+    printf(" BootJmp                 %d\n",DBR.BootJmp);
+    printf(" OemName                 %d%d\n",DBR.OemName[0], DBR.OemName[1]);
+    printf(" BytesPerSector          %d\n",DBR.BytesPerSector);
+    printf(" SectorPerCluster        %d\n",DBR.SectorPerCluster);
+    printf(" ReservedSectorCount     %d\n",DBR.ReservedSectorCount);
+    printf(" FATsCount               %d\n",DBR.FATsCount);
+    printf(" RootDirCount16          %d\n",DBR.RootDirCount16);
+    printf(" TotalSectorCount16      %d\n",DBR.TotalSectorCount16);
+    printf(" MediaType               %d\n",DBR.MediaType);
+    printf(" SectorPerFAT16          %d\n",DBR.SectorPerFAT16);
+    printf(" SectorPerTrack          %d\n",DBR.SectorPerTrack);
+    printf(" HeadSideCount           %d\n",DBR.HeadSideCount);
+    printf(" HiddenSectorCount       %d\n",DBR.HiddenSectorCount);
+    printf(" SectorCount             %d\n",DBR.SectorCount);
+    printf(" SectorPerFAT32          %d\n",DBR.SectorPerFAT32);
+    printf(" Flag32                  %d\n",DBR.Flag32);
+    printf(" FATVersion              %d\n",DBR.FATVersion);
+    printf(" RootFirstCluster        %d\n",DBR.RootFirstCluster);
+    printf(" FSInfoSector            %d\n",DBR.FSInfoSector);
+    printf(" BackupBSSector          %d\n",DBR.BackupBSSector);
+    printf(" FATExtend               %d%d%d\n",DBR.FATExtend[0],DBR.FATExtend[1],DBR.FATExtend[2]);
+    printf(" DriveNumber1            %d\n",DBR.DriveNumber1);
+    printf(" DriveNumber2            %d\n",DBR.DriveNumber2);
+    printf(" ExtendBootFlag          %d\n",DBR.ExtendBootFlag);
+    printf(" VolumeAlignment         %d\n",DBR.VolumeAlignment);
+    printf(" VolumeLabel             %d%d%d%d\n",DBR.VolumeLabel.Bytes4, DBR.VolumeLabel.Bytes8,  DBR.VolumeLabel.Bytes10, DBR.VolumeLabel.Bytes11);
+    printf(" FSFormat                %d%d\n",DBR.FSFormat[0], DBR.FSFormat[1]);
+    printf(" SignatureFlag           %d\n",DBR.SignatureFlag);
+    printf("-----------------------------------------------------------\n");
+    
+}
+void printFSINFO()
+{
+    printf("\nFSINFO Attributes info:\n");
+    printf("-----------------------------------------------------------\n");
+    printf(" FSINFO Attribute        Value\n");
+    printf("----------------------- -----------------------------------\n");
+    printf(" ExtendBootFlag          %d\n",FSINFO.ExtendBootFlag);
+    printf(" FSINFOSignature         %d\n",FSINFO.FSINFOSignature);
+    printf(" NextAvailableCluster    %d\n",FSINFO.NextAvailableCluster);
+    printf(" Flag55AA                %d\n",FSINFO.Flag55AA);
+    printf("-----------------------------------------------------------\n");
 }
 
 // 从文件中读取一个字节
@@ -80,6 +151,7 @@ uint32_t getDoubleWordFromFile(FILE *input, uint32_t offset, uint32_t whence)
     n += fgetc(input) << 24;
     return n;
 }
+
 
 // 从字符串中读取一个字节
 uint8_t getByte(uint8_t *buffer, uint32_t offset)
@@ -115,20 +187,57 @@ uint32_t getDoubleWord(uint8_t *buffer, uint32_t offset)
 // 初始化DBR的相关属性
 void initDBR(FILE *input, struct DosBootRecord *dbr)
 {
+    dbr->BootJmp = getDoubleWordFromFile(input, 0, SEEK_SET);
+    dbr->OemName[0] = getDoubleWordFromFile(input, 3, SEEK_SET);
+    dbr->OemName[1] = getDoubleWordFromFile(input, 7, SEEK_SET);
     dbr->BytesPerSector = getWordFromFile(input, 11, SEEK_SET);     // SEEK_SET 文件开头
     dbr->SectorPerCluster = getByteFromFile(input, 13, SEEK_SET);
     dbr->ReservedSectorCount = getWordFromFile(input, 14, SEEK_SET);
     dbr->FATsCount = getByteFromFile(input, 16, SEEK_SET);
-    dbr->TotalSectorCount = getDoubleWordFromFile(input, 32, SEEK_SET);
-    dbr->FATSize = getDoubleWordFromFile(input, 36, SEEK_SET);
+    dbr->RootDirCount16 = getWordFromFile(input, 17, SEEK_SET);
+    dbr->TotalSectorCount16 = getDoubleWordFromFile(input, 19, SEEK_SET);
+    dbr->MediaType = getByteFromFile(input, 21, SEEK_SET);
+    dbr->SectorPerFAT16 = getWordFromFile(input, 22, SEEK_SET);
+    dbr->SectorPerTrack = getWordFromFile(input, 24, SEEK_SET);
+    dbr->HeadSideCount = getWordFromFile(input, 26, SEEK_SET);
+    dbr->HiddenSectorCount = getDoubleWordFromFile(input, 28, SEEK_SET);
+    dbr->SectorCount = getWordFromFile(input, 32, SEEK_SET);
+    dbr->SectorPerFAT32 = getDoubleWordFromFile(input, 36, SEEK_SET);
+    dbr->Flag32 = getWordFromFile(input, 40, SEEK_SET);
+    dbr->FATVersion = getWordFromFile(input, 42, SEEK_SET);
+    dbr->RootFirstCluster = getDoubleWordFromFile(input, 44, SEEK_SET);
+    dbr->FSInfoSector = getWordFromFile(input, 48, SEEK_SET);
+    dbr->BackupBSSector = getWordFromFile(input, 50, SEEK_SET);
+    dbr->FATExtend[0] = getDoubleWordFromFile(input, 52, SEEK_SET);
+    dbr->FATExtend[1] = getDoubleWordFromFile(input, 56, SEEK_SET);
+    dbr->FATExtend[2] = getDoubleWordFromFile(input, 60, SEEK_SET);
+    dbr->DriveNumber1 = getByteFromFile(input, 64, SEEK_SET);
+    dbr->DriveNumber2 = getByteFromFile(input, 65, SEEK_SET);
+    dbr->ExtendBootFlag = getByteFromFile(input, 66, SEEK_SET);
+    dbr->VolumeAlignment = getDoubleWordFromFile(input, 67, SEEK_SET);
+    dbr->VolumeLabel.Bytes4 = getDoubleWordFromFile(input, 71, SEEK_SET);
+    dbr->VolumeLabel.Bytes8 = getDoubleWordFromFile(input, 75, SEEK_SET);
+    dbr->VolumeLabel.Bytes10 = getWordFromFile(input, 79, SEEK_SET);
+    dbr->VolumeLabel.Bytes11 = getByteFromFile(input, 81, SEEK_SET);
+    dbr->FSFormat[0] = getDoubleWordFromFile(input, 82, SEEK_SET);
+    dbr->FSFormat[1] = getDoubleWordFromFile(input, 86, SEEK_SET);
+    dbr->SignatureFlag = getWordFromFile(input, 510, SEEK_SET);
+}
+
+void initFSINFO(FILE *input, struct FSINFO *fsinfo)
+{
+    fsinfo->ExtendBootFlag = getDoubleWordFromFile(input, 512, SEEK_SET);
+    fsinfo->FSINFOSignature = getDoubleWordFromFile(input, 996, SEEK_SET);
+    fsinfo->NextAvailableCluster = getDoubleWordFromFile(input, 1004, SEEK_SET);
+    fsinfo->Flag55AA = getWordFromFile(input, 1022, SEEK_SET);
 }
 
 // 初始化FAT32的相关参数
 void initFAT32(struct FileAllocationTable32 *fat32, struct DosBootRecord *dbr)
 {
     fat32->FAT1Offset = dbr->BytesPerSector * dbr->ReservedSectorCount;
-    fat32->FAT2Offset = fat32->FAT1Offset + dbr->BytesPerSector * dbr->FATSize;
-    fat32->RootDirectoryOffset = fat32->FAT2Offset + dbr->BytesPerSector * dbr->FATSize;
+    fat32->FAT2Offset = fat32->FAT1Offset + dbr->BytesPerSector * dbr->SectorPerFAT32;
+    fat32->RootDirectoryOffset = fat32->FAT2Offset + dbr->BytesPerSector * dbr->SectorPerFAT32;
     fat32->BytesPerCluster = dbr->SectorPerCluster * dbr->BytesPerSector;
     fat32->DirItemPerCluster = fat32->BytesPerCluster / 0x20;
 }
@@ -402,9 +511,11 @@ int main()
     FILE *input;
     input = fopen("/home/ruby/Documents/fat32/fat32d.img", "rb");
     initDBR(input, &DBR);
+    initFSINFO(input, &FSINFO);
     initFAT32(&FAT32, &DBR);
     // 递归遍历根目录
     walkDirectory(input, 0x2, 0);
-    printFAT32();
+    printDBR();
+    printFSINFO();
     return 0;
 }
