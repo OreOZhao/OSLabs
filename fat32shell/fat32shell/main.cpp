@@ -597,6 +597,7 @@ void showDepth(uint32_t depth)
     printf("├── ");
 }
 
+// 打印目录项的所有信息
 void listLong(DirectoryInfo *directoryItem)
 {
     printf("\n");
