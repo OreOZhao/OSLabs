@@ -318,6 +318,11 @@ DirectoryInfo *getDirectoryItem(uint8_t *buffer, uint32_t offset)
     return directoryInfo;
 }
 
+
+
+
+
+
 // 返回FAT32表中的下一簇簇号
 uint32_t getNextCluster(FILE *input, uint32_t cluster)
 {
@@ -504,8 +509,15 @@ void walkDirectory(FILE *input, uint32_t cluster, uint32_t depth)
     }
 }
 
-
-
+/*
+void printDirectoryItem(FILE *input, uint32_t cluster, uint32_t depth, uint8_t * path)
+{
+    DirectoryInfo **directoryList = getRawDirectory(input, cluster);
+    DirectoryInfo *directoryItem;
+    
+    
+}
+*/
 int main()
 {
     FILE *input;
